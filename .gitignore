@@ -1,0 +1,14 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+
+# Runtime inputs/outputs
+data/
+reports/
+tmp/
+*.xlsx
+*.xls
+
+# n8n local state
+.n8n/
