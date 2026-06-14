@@ -1,0 +1,187 @@
+{
+  "name": "CSV to Excel Report - OneDrive",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "csv-to-excel-report",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryData": true
+        }
+      },
+      "id": "f7b16f04-62fa-4d45-b9ad-93aa54de51ff",
+      "name": "Webhook - Upload CSV",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -820,
+        120
+      ],
+      "webhookId": "csv-to-excel-report"
+    },
+    {
+      "parameters": {
+        "fileName": "=/tmp/input-{{$execution.id}}.csv",
+        "dataPropertyName": "data"
+      },
+      "id": "7f1674c4-5c87-4f92-99db-7189a6ba40a3",
+      "name": "Write Uploaded CSV",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=python3 /workspace/src/report_runner.py --input-csv \"/tmp/input-{{$execution.id}}.csv\" --output-xlsx \"/tmp/report-{{$execution.id}}.xlsx\""
+      },
+      "id": "52a783e4-d10d-4a5b-a8a3-e603e591d834",
+      "name": "Run Python Report",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "filePath": "=/tmp/report-{{$execution.id}}.xlsx",
+        "dataPropertyName": "report"
+      },
+      "id": "7d5f479d-b1d6-43ef-a3ed-b715e53728b3",
+      "name": "Read Excel Report",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "name": "=report-{{$now.toFormat('yyyyLLdd-HHmmss')}}.xlsx",
+        "binaryData": true,
+        "binaryPropertyName": "report",
+        "parentFolderId": "REPLACE_WITH_ONEDRIVE_FOLDER_ID"
+      },
+      "id": "2a84b2c6-8a18-4c79-9f4f-9a7d6c77569e",
+      "name": "Upload to OneDrive",
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        220,
+        120
+      ],
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "REPLACE_IN_N8N",
+          "name": "Microsoft OneDrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"uploaded\", \"message\": \"Excel report generated and uploaded to OneDrive\", \"oneDriveResult\": $json } }}",
+        "options": {}
+      },
+      "id": "2ac5e1f1-7770-4e04-8937-f13d311ee65a",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        480,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Future Claude step:\n\nAdd this between \"Run Python Report\" and \"Read Excel Report\" if you want Claude to summarize, validate, or enrich the report before upload.\n\nRecommended inputs:\n- The report command stdout/stderr\n- A small JSON summary emitted by the Python script\n- Selected CSV/report metrics, not the full workbook unless needed\n\nCredential to add later: ANTHROPIC_API_KEY or n8n Anthropic credential.",
+        "height": 260,
+        "width": 360
+      },
+      "id": "10ac295a-e7dd-4d21-a1e9-a56987c711a9",
+      "name": "Claude API Placeholder",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -240
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - Upload CSV": {
+      "main": [
+        [
+          {
+            "node": "Write Uploaded CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Uploaded CSV": {
+      "main": [
+        [
+          {
+            "node": "Run Python Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Python Report": {
+      "main": [
+        [
+          {
+            "node": "Read Excel Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Excel Report": {
+      "main": [
+        [
+          {
+            "node": "Upload to OneDrive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to OneDrive": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a9e0ce6b-5e45-4093-bd01-677f0ae17466",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "csv-to-excel-onedrive",
+  "tags": []
+}
