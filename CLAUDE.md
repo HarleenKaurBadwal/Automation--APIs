@@ -94,128 +94,269 @@ Offer quick answers: **Yes** / **No** / **Not sure**
 
 ---
 
-## Phase 3 — Iterative IP collection (repeat for each item)
+## Phase 3 — The 16 standard trade secret questions (repeat for each IP item)
 
-For each trade secret / IP item, collect the following **one question at a time**.
+For each trade secret / IP item, ask **all 16 questions below — one at a time**.  
+These are aligned to the GSTS Trade Secret Interview and Automation Guide (Sections 5 and 6.3).
 
-### Item counter
-Assign each item a number: Item 1, Item 2, etc.
+Assign each item a number: **Item 1**, **Item 2**, etc.
+
+### Question index (ask in order)
+
+| # | Topic | Guide reference |
+|---|--------|-----------------|
+| Q1 | Candidate title | §6.3 Q1 |
+| Q2 | Business owner / accountable team | §5 |
+| Q3 | Technical owner | §5 |
+| Q4 | Trade secret awareness (branch if unsure) | §6.2 opening |
+| Q5 | Plain-language description | §6.3 Q1 |
+| Q6 | Problem solved / where used | §6.3 Q2, §5 |
+| Q7 | Novel / differentiating aspects | §6.3 Q3, §5 |
+| Q8 | Confidential elements | §6.3 Q4, §5 |
+| Q9 | Inventors and contributors | §6.3 Q5, §5 |
+| Q10 | Source locations (links only) | §6.3 Q6, §5 |
+| Q11 | External disclosure | §6.3 Q7 |
+| Q12 | Disclosure type and details | §6.3 Q8 |
+| Q13 | Risk if disclosed | §6.3 Q9, §5 |
+| Q14 | Recommended IP treatment | §6.3 Q10, §5 |
+| Q15 | Confidentiality controls | §6.3 Q11, §5 |
+| Q16 | AI-use restriction | §8–10 handling rules |
+
+After Q16: optional codebase-assisted draft (see below), then ask if there are more items.
 
 ---
 
-### 3.1 Candidate title
-> "What is a **short title** for this capability, method, model, or workflow?"
+### Q1. Candidate title
+**Guide §6.3 Q1:** What is the capability, method, model, workflow, or technical approach we are discussing? Capture a clear title and short description.
 
-Field: `candidate_title`
+> "What is the **capability, method, model, workflow, or technical approach** we are documenting? Please give a **short, clear title**."
 
-### 3.2 Plain-language description
-> "In plain language, **what is it** and **what problem does it solve**?"
+Record as: `candidate_title`
 
-Field: `plain_language_description`  
-*Do not ask for code.*
+---
 
-### 3.3 Where used
-> "Where is it used — which **OCIANA module**, **ORCA/API endpoint**, **pipeline**, **product feature**, or **internal process**?"
+### Q2. Business owner / accountable team
+**Guide §5:** The group responsible for the asset.
 
-Field: `where_used`
+> "Which **team or group** is accountable for this asset? (e.g. Data Science, Engineering, Product, AI Governance)"
 
-### 3.4 Novel / differentiating aspects
-> "What makes this **valuable** or **difficult for a competitor to reproduce**?"
+Record as: `business_owner_team`
 
-Field: `novel_differentiating_aspects`
+---
 
-### 3.5 Confidential elements
-> "What are the main **confidential elements**? (e.g. algorithm logic, model features, thresholds, decision logic, architecture, data pipeline, evaluation method, tuning choices, operational workflow)"
+### Q3. Technical owner
+**Guide §5:** The person most able to explain the confidential method or workflow.
 
-Field: `confidential_elements`  
+> "Who is the **technical owner** — the person who can best explain this? Provide **name, role, and team**."
+
+Record as: `technical_owner`
+
+---
+
+### Q4. Trade secret awareness
+**Guide §6.2:** Use if the interviewee may not understand the term.
+
+> "Do you know what we mean by a **trade secret** in this GSTS context? (Yes / No / Not sure)"
+
+**If No or Not sure**, say:
+> "A trade secret is valuable know-how GSTS keeps confidential — such as model logic, workflows, thresholds, data fusion, architecture, evaluation methods, or operational decision logic that gives us a competitive edge. We are recording **candidates for review**, not making a legal determination today."
+
+Then continue to Q5.
+
+Record as: `trade_secret_awareness`
+
+---
+
+### Q5. Plain-language description
+**Guide §6.3 Q1 / §5:** What the trade secret is, without copying code.
+
+> "In **plain language**, what is this asset? Describe **what it is** without copying code or over-disclosing sensitive details."
+
+Record as: `plain_language_description`  
+*Do not ask for source code.*
+
+---
+
+### Q6. Problem solved and where used
+**Guide §6.3 Q2 / §5:** Link to OCIANA, customers, or operations.
+
+> "What **problem does it solve** for OCIANA, customers, or internal operations? And **where is it used** — which OCIANA module, ORCA/API endpoint, model, pipeline, workflow, UI feature, customer use case, or internal process?"
+
+*Prompt if needed:* maritime risk, vessel behaviour, routing, prediction, port operations, logistics, defence/security, environmental intelligence, product scalability.
+
+Record as: `problem_solved`, `where_used`
+
+---
+
+### Q7. Novel or differentiating aspects
+**Guide §6.3 Q3 / §5:** Why valuable and hard to reproduce.
+
+> "What makes this approach **valuable** or **difficult for a competitor to reproduce**?"
+
+*Look for:* domain-specific know-how, unique data combinations, feature engineering, thresholds, workflows, evaluation methods, lessons learned.
+
+Record as: `novel_differentiating_aspects`
+
+---
+
+### Q8. Confidential elements
+**Guide §6.3 Q4 / §5:** What must stay confidential.
+
+> "What are the **confidential elements**?"
+
+*Examples:* algorithm logic, model features, training approach, thresholds, decision logic, architecture, data pipeline, evaluation method, tuning choices, operational workflow.
+
+Record as: `confidential_elements`  
 *High level only — no code paste.*
 
-### 3.6 Contributors
-> "Who **contributed** to developing or improving this? Include names, roles, contribution type, and approximate dates if known."
+---
 
-Field: `inventors_contributors`
+### Q9. Inventors and contributors
+**Guide §6.3 Q5 / §5:** Who developed or improved the capability.
 
-### 3.7 Source locations
-> "Where is this **implemented or documented**? Please provide **secure links only** — Confluence, GitLab, SharePoint, Aha, model docs, API docs."
+> "Who **contributed** to the development or improvement of this capability? Capture inventors, contributors, reviewers, domain experts, and engineers — include **names, roles, contribution types, and dates or periods** if known."
 
-Field: `source_locations`  
-*Links only.*
+Record as: `inventors_contributors`
 
-### 3.8 Codebase-assisted draft (optional)
-> "Would you like to point me to a **specific codebase, repository path, or documentation folder** so I can help draft a summary based on that material? (Yes / No)"
+---
 
-**If Yes:**
-- Ask: "Please provide the repository path, branch, or folder. Confirm you have permission to reference this material in an approved Claude environment."
-- Review the material the user grants access to.
-- Generate a **draft writeup** based on the code/docs, but:
-  - Summarize at a high level.
-  - Do **not** include long code blocks in the final document.
-  - Focus on what is proprietary, how it works conceptually, and why it matters.
-- Present the draft to the user for review and edits.
+### Q10. Source locations
+**Guide §6.3 Q6 / §5:** Secure links only — do not copy code.
 
-**If No:**
-- Continue with manually entered information only.
+> "Where is this **implemented or documented**? Record **secure links or locations** only — Confluence, GitLab, SharePoint, Aha, model docs, notebooks, API docs, architecture docs."
 
-Field: `codebase_reference` (if provided), `codebase_assisted_summary` (if generated)
+> "If there is no single page, where would someone with access find the evidence?"
 
-### 3.9 Dissemination history
-> "Has any part of this been **shared outside GSTS**? (customer demos, proposals, partners, universities, funding applications, marketing, conferences, publications)"
+Record as: `source_locations`  
+*Links only. Do not copy code.*
 
-If yes, ask:
-> "For each disclosure: was it **public or confidential**? When, to whom, under NDA/contract, and what was shared?"
+---
 
-Field: `dissemination_history`
+### Q11. External disclosure
+**Guide §6.3 Q7 / §5:** Any sharing outside GSTS.
 
-### 3.10 Confidentiality controls
-> "What **controls** protect this today? (access limits, restricted repos, confidential labels, NDAs, need-to-know)"
+> "Has any part of this been **disclosed outside GSTS**?"
 
-Field: `confidentiality_controls`
+*Examples:* customer demos, proposals, partner discussions, university collaborations, funding applications, marketing material, conference presentations, publications.
 
-### 3.11 AI-use restriction
-> "Has any part of this been entered into **public or unapproved AI tools**? GSTS default: do not enter sensitive know-how into public or unapproved AI tools."
+- If **No** → record `dissemination_history` as "No known external disclosure" and skip to Q13.
+- If **Yes** → continue to Q12.
 
-Field: `ai_use_restriction`
+Record as: `external_disclosure_yes_no`
 
-### 3.12 Risk if disclosed
-> "What would happen if this became **public** or was used by a **competitor**?"
+---
 
-Field: `risk_if_disclosed`
+### Q12. Disclosure type and details
+**Guide §6.3 Q8 / §5:** Public vs confidential sharing.
 
-### 3.13 Recommended IP treatment
-> "What is the **recommended treatment**?"
+> "Was the disclosure **public or confidential**? Capture **dates, audience, NDA/contract status**, and **what was actually shared**."
+
+Record as: `dissemination_history`
+
+---
+
+### Q13. Risk if disclosed
+**Guide §6.3 Q9 / §5:** Commercial, operational, security, or IP impact.
+
+> "What would happen if this information became **public** or was **used by a competitor**?"
+
+*Consider:* commercial, operational, product, customer trust, security, or IP impact.
+
+Record as: `risk_if_disclosed`
+
+---
+
+### Q14. Recommended IP treatment
+**Guide §6.3 Q10 / §5:** Trade secret, patent review, or other action.
+
+> "What is the **recommended IP treatment** for this asset?"
+
+Options:
 - Maintain as trade secret
 - Review for patent protection
 - Review for design protection
 - Strengthen controls
-- No further action
+- No further action / close
 
-Field: `recommended_ip_treatment`
+*Flag for IP Officer or Legal review where needed.*
 
-### 3.14 Escalation
-> "Is there anything you are **unsure** about that should go to the IP Officer, CAIO, or Legal?"
+Record as: `recommended_ip_treatment`
 
-Field: `escalation_notes`
+---
 
-### 3.15 More items?
+### Q15. Confidentiality controls
+**Guide §6.3 Q11 / §5:** How the asset is protected today.
+
+> "What **confidentiality controls** should be applied or are already in place?"
+
+*Examples:* access limits, restricted pages/repos, confidential marking, AI-tool restrictions, need-to-know sharing, review cadence, NDAs.
+
+Record as: `confidentiality_controls`
+
+---
+
+### Q16. AI-use restriction
+**Guide §8–10 handling rules:** Default restriction on public/unapproved AI tools.
+
+> "Has any part of this been entered into **public or unapproved AI tools**?"
+
+**Default to record:** "Do not enter into public or unapproved AI tools; approved-tool use requires review if sensitive."
+
+Record as: `ai_use_restriction`
+
+---
+
+### Optional — Codebase-assisted draft (after Q16)
+**Per Harry Singh workflow:** User may point Claude to a codebase for a draft writeup.
+
+> "Would you like to point me to a **specific codebase, repository path, or documentation folder** so I can help draft a summary based on that material? (Yes / No)"
+
+**If Yes:**
+- Ask for repository path, branch, or folder. Confirm permission in an approved Claude environment.
+- Generate a **high-level draft writeup** — no long code blocks in the final document.
+- Present draft for user review and edits.
+
+Record as: `codebase_reference`, `codebase_assisted_summary` (if applicable)
+
+---
+
+### After all 16 questions — more items?
+
 > "Are there **additional** trade secrets or IP items to document for this period? (Yes / No)"
 
-**If Yes:** return to **3.1** for the next item.  
+**If Yes:** return to **Q1** for the next item.  
 **If No:** proceed to **Phase 4**.
+
+---
+
+### Escalation (ask once per item, after Q16 or at end of item)
+
+> "Is there anything you are **unsure** about that should be escalated to the **IP Officer, CAIO, Document Control Officer, or Legal**?"
+
+Record as: `escalation_notes`
+
 
 ---
 
 ## Phase 4 — Quality checklist (run before generating document)
 
-Confirm internally that each recorded item has:
+Confirm internally that each recorded item has answers for **all 16 questions** (or documented N/A):
 
-- [ ] Clear title
-- [ ] Technical owner and contributors identified
-- [ ] Description explains what/why without unnecessary implementation detail
-- [ ] Source locations are links/references
-- [ ] Dissemination documented (or "no known external disclosure")
-- [ ] Confidentiality controls recorded
-- [ ] AI-use restrictions noted
-- [ ] Recommended IP treatment captured
+- [ ] Q1 — Clear title
+- [ ] Q2 — Business owner / team identified
+- [ ] Q3 — Technical owner identified
+- [ ] Q4 — Trade secret awareness addressed
+- [ ] Q5 — Plain-language description (no unnecessary implementation detail)
+- [ ] Q6 — Problem solved and where used
+- [ ] Q7 — Novel / differentiating aspects
+- [ ] Q8 — Confidential elements (high level)
+- [ ] Q9 — Contributors identified
+- [ ] Q10 — Source locations are links/references only
+- [ ] Q11–Q12 — Dissemination documented (or "no known external disclosure")
+- [ ] Q13 — Risk if disclosed
+- [ ] Q14 — Recommended IP treatment
+- [ ] Q15 — Confidentiality controls recorded
+- [ ] Q16 — AI-use restrictions clear
 
 If anything is missing, ask the user to fill the gap before generating the final document.
 
@@ -269,7 +410,29 @@ Use this structure:
 
 ## Item 1: [candidate_title]
 
+| # | Field | Response |
+|---|-------|----------|
+| Q1 | Candidate title | |
+| Q2 | Business owner / team | |
+| Q3 | Technical owner | |
+| Q4 | Trade secret awareness | |
+| Q5 | Plain-language description | |
+| Q6 | Problem solved / where used | |
+| Q7 | Novel / differentiating aspects | |
+| Q8 | Confidential elements | |
+| Q9 | Inventors and contributors | |
+| Q10 | Source locations | |
+| Q11 | External disclosure | |
+| Q12 | Disclosure details | |
+| Q13 | Risk if disclosed | |
+| Q14 | Recommended IP treatment | |
+| Q15 | Confidentiality controls | |
+| Q16 | AI-use restriction | |
+
 ### Plain-language description
+...
+
+### Problem solved
 ...
 
 ### Where used
@@ -290,16 +453,19 @@ Use this structure:
 ### Dissemination history
 ...
 
+### Risk if disclosed
+...
+
+### Recommended IP treatment
+...
+
 ### Confidentiality controls
 ...
 
 ### AI-use restriction
 ...
 
-### Risk if disclosed
-...
-
-### Recommended IP treatment
+### Codebase-assisted summary (if applicable)
 ...
 
 ### Escalation notes
@@ -377,6 +543,30 @@ When a team member opens Claude, they should:
 5. Save and upload the generated document at the end.
 
 ---
+
+## Quick reference — all 16 questions per IP item
+
+| # | Question (short) | Field |
+|---|------------------|-------|
+| Q1 | Candidate title | `candidate_title` |
+| Q2 | Business owner / team | `business_owner_team` |
+| Q3 | Technical owner | `technical_owner` |
+| Q4 | Trade secret awareness | `trade_secret_awareness` |
+| Q5 | Plain-language description | `plain_language_description` |
+| Q6 | Problem solved / where used | `problem_solved`, `where_used` |
+| Q7 | Novel / differentiating aspects | `novel_differentiating_aspects` |
+| Q8 | Confidential elements | `confidential_elements` |
+| Q9 | Inventors and contributors | `inventors_contributors` |
+| Q10 | Source locations (links only) | `source_locations` |
+| Q11 | External disclosure (yes/no) | `external_disclosure_yes_no` |
+| Q12 | Disclosure type and details | `dissemination_history` |
+| Q13 | Risk if disclosed | `risk_if_disclosed` |
+| Q14 | Recommended IP treatment | `recommended_ip_treatment` |
+| Q15 | Confidentiality controls | `confidentiality_controls` |
+| Q16 | AI-use restriction | `ai_use_restriction` |
+
+Plus session metadata (Phase 1): submitter, team, period, technical owner.  
+Plus period screening (Phase 2): any IP generated this period?
 
 ## Quick reference — field list
 
