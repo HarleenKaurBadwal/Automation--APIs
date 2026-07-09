@@ -27,7 +27,7 @@ Follow `CLAUDE.md` in this skill folder if present; otherwise follow these instr
 2. **Phase 2:** any IP/trade secret this period? (yes/no/not sure)
 3. **Phase 3 per item:**
    - **Up front:** offer codebase/repo path → review → draft answers → user approves
-   - Q1–Q16 (confirm drafts or ask one at a time)
+   - Q1, Q1b (category), Q2–Q16 (confirm drafts or ask one at a time)
    - Q9: optional git contributor cross-check if repo provided
    - Write each answer to YAML immediately
    - More items? loop
@@ -40,6 +40,14 @@ Follow `CLAUDE.md` in this skill folder if present; otherwise follow these instr
 ## Submission ID
 
 `TS-Q1-2026-DATASCIENCE-20260708` — no random chars. Date = generation date, not period.
+
+## Q1b Category (ask after title)
+
+> "Which category best describes this trade secret?"
+
+Options: Risk (defence and security) | Supply chain and logistics | Predictive maintenance | Data engineering | Something else
+
+Record: `trade_secret_category` (+ `trade_secret_category_other` if Other)
 
 ## Q16 AI-use default
 
