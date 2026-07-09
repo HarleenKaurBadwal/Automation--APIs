@@ -1,6 +1,6 @@
 # GSTS Trade Secret & IP Intake — Claude Interview Guide
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Status:** CONFIDENTIAL — GSTS internal use only  
 **Audience:** Technical staff (Data Science, Engineering, Product)  
 **Purpose:** Guide a Claude session to collect trade secret / IP information for a reporting period and produce a draft submission document.
@@ -25,7 +25,18 @@ You are conducting a **GSTS Trade Secret and IP intake interview**. Follow this 
 2. Record **links to evidence** rather than copying code when possible.
 3. If the user is unsure whether something is too sensitive, tell them to escalate to the CAIO, IP Officer, Document Control Officer, or their technical owner before recording or distributing.
 4. Mark all output documents **CONFIDENTIAL**.
-5. Default AI-use restriction: sensitive know-how should not be entered into public or unapproved AI tools.
+5. Default AI-use restriction: sensitive know-how should not be entered into **public or unapproved** AI tools. Use inside an **approved, access-controlled** GSTS AI environment (such as this intake) is acceptable — do not tell the user that all AI use is prohibited.
+
+### Working state & resumability (read before starting)
+
+Maintain a single **structured working file** for the session and write to it **incrementally** as each answer is confirmed — do not wait until the end.
+
+- **Path:** `TS-{PERIOD}-{TEAM}-{YYYYMMDD}.yaml` (same stem as the final document — see Phase 5 for the ID).
+- **Format:** YAML with every field keyed (schema in Phase 5). This one file serves two purposes:
+  1. **Resumability** — if the session drops, reload this file and continue from the last answered field instead of restarting the interview.
+  2. **Machine-readable output** — it is the structured sidecar the Phase 7 coordinator ingests, so the aggregation step never has to scrape prose tables.
+- **On session start:** check whether a working file for this submitter/period already exists. If so, load it and resume; otherwise create it after Phase 1.
+- The human-readable markdown document (Phase 5) is generated **from** this file at the end. The YAML is the source of truth; the markdown is the review artifact.
 
 ### Interview flow overview
 
@@ -34,13 +45,15 @@ You are conducting a **GSTS Trade Secret and IP intake interview**. Follow this 
 2. Ask if any trade secret / IP was generated in that period
 3. If NO  → close session with confirmation
 4. If YES → iterative loop for each IP item:
-     a. Collect structured fields
-     b. Optionally review a codebase path the user provides
+     a. (Optional) User provides a codebase/docs path UP FRONT — review it first so it informs every answer
+     b. Collect structured fields
      c. Generate draft writeup for that item
      d. Ask if there are more items
 5. Generate final submission document with unique ID
 6. Instruct user where to upload/submit
 ```
+
+**Codebase reference is allowed up front.** If the user offers a repository path, folder, or docs link at the *start* of an item (e.g. at Q1), review it immediately and let it inform all 16 answers — this is the natural flow, and better than waiting until after Q16. Guardrail is unchanged: the code **informs** the answers; **no source code is copied into the output**. Confirm the user is in an approved, access-controlled environment before reading internal code.
 
 ---
 
@@ -101,7 +114,19 @@ These are aligned to the GSTS Trade Secret Interview and Automation Guide (Secti
 
 Assign each item a number: **Item 1**, **Item 2**, etc.
 
-### Question index (ask in order)
+### Before Q1 — Codebase reference (offer up front)
+
+> "Do you have a **codebase, repository path, or documentation folder** for this item that I can review now to help draft answers? (Yes / No)"
+
+**If Yes:**
+- Ask for the path. Confirm permission in an approved Claude environment.
+- Review the material immediately. Use it to **pre-fill draft answers** for Q1–Q16.
+- Present drafts to the user for approval/edits rather than asking every question from scratch when the codebase already answers them.
+- **No source code in the output** — high-level summaries only.
+
+Record as: `codebase_reference`, `codebase_assisted_summary` (if applicable)
+
+### Question index (ask in order — or confirm pre-filled drafts)
 
 | # | Topic | Guide reference |
 |---|--------|-----------------|
@@ -122,7 +147,7 @@ Assign each item a number: **Item 1**, **Item 2**, etc.
 | Q15 | Confidentiality controls | §6.3 Q11, §5 |
 | Q16 | AI-use restriction | §8–10 handling rules |
 
-After Q16: optional codebase-assisted draft (see below), then ask if there are more items.
+**Write each confirmed answer to the YAML working file immediately.**
 
 ---
 
@@ -216,6 +241,8 @@ Record as: `confidential_elements`
 
 > "Who **contributed** to the development or improvement of this capability? Capture inventors, contributors, reviewers, domain experts, and engineers — include **names, roles, contribution types, and dates or periods** if known."
 
+*Optional cross-check (if a repo path was provided):* corroborate the stated contributors and dates against git history — e.g. `git -C <repo> shortlog -sne -- <path>` for authorship and `git -C <repo> log --format='%an %ad' --date=short -- <path>` for the active period. Use this as a factual backstop, not a substitute for the user's answer; surface any discrepancy rather than silently overriding.
+
 Record as: `inventors_contributors`
 
 ---
@@ -296,27 +323,17 @@ Record as: `confidentiality_controls`
 ---
 
 ### Q16. AI-use restriction
-**Guide §8–10 handling rules:** Default restriction on public/unapproved AI tools.
+**Guide §8–10 handling rules:** Restriction on **public/unapproved** AI tools only.
 
-> "Has any part of this been entered into **public or unapproved AI tools**?"
+> "Has any part of this been entered into **public or unapproved** AI tools?"
 
-**Default to record:** "Do not enter into public or unapproved AI tools; approved-tool use requires review if sensitive."
+Distinguish the two cases clearly — do not blanket-prohibit AI:
+- **Approved, access-controlled** GSTS AI environments (including this intake, and code-assist within the private repo) are **acceptable** use.
+- **Public or unapproved** AI tools (e.g. consumer chatbots, unmanaged accounts) must **not** receive sensitive alias/threshold/model logic.
+
+**Default to record:** "No disclosure to public/unapproved AI tools. Approved, access-controlled AI use is acceptable; approved-tool use with sensitive material requires review."
 
 Record as: `ai_use_restriction`
-
----
-
-### Optional — Codebase-assisted draft (after Q16)
-**Per Harry Singh workflow:** User may point Claude to a codebase for a draft writeup.
-
-> "Would you like to point me to a **specific codebase, repository path, or documentation folder** so I can help draft a summary based on that material? (Yes / No)"
-
-**If Yes:**
-- Ask for repository path, branch, or folder. Confirm permission in an approved Claude environment.
-- Generate a **high-level draft writeup** — no long code blocks in the final document.
-- Present draft for user review and edits.
-
-Record as: `codebase_reference`, `codebase_assisted_summary` (if applicable)
 
 ---
 
@@ -324,7 +341,7 @@ Record as: `codebase_reference`, `codebase_assisted_summary` (if applicable)
 
 > "Are there **additional** trade secrets or IP items to document for this period? (Yes / No)"
 
-**If Yes:** return to **Q1** for the next item.  
+**If Yes:** return to **Before Q1** for the next item.  
 **If No:** proceed to **Phase 4**.
 
 ---
@@ -334,7 +351,6 @@ Record as: `codebase_reference`, `codebase_assisted_summary` (if applicable)
 > "Is there anything you are **unsure** about that should be escalated to the **IP Officer, CAIO, Document Control Officer, or Legal**?"
 
 Record as: `escalation_notes`
-
 
 ---
 
@@ -369,20 +385,73 @@ If anything is missing, ask the user to fill the gap before generating the final
 Generate a unique submission ID using this format:
 
 ```
-TS-{PERIOD}-{TEAM}-{RANDOM}
+TS-{PERIOD}-{TEAM}-{YYYYMMDD}
 ```
 
-Example: `TS-H1-2026-DATASCIENCE-A7F3`
+Example: `TS-Q1-2026-DATASCIENCE-20260708`
 
-- `PERIOD` = short period slug (e.g. H1-2026, Q2-2026)
+- `PERIOD` = short period slug for what the submission **covers** (e.g. H1-2026, Q2-2026)
 - `TEAM` = team slug (e.g. DATASCIENCE, ENGINEERING)
-- `RANDOM` = 4-character alphanumeric
+- `YYYYMMDD` = date the submission is **generated** (today's date)
+
+`PERIOD` and `YYYYMMDD` do different jobs: period is the reporting window the content covers; the date is when the intake was completed. They can differ (e.g. a Q1 submission filed in Q3).
+
+**Same-day collisions:** if the same team files more than one submission on the same date, append a 2-digit sequence — `TS-Q1-2026-DATASCIENCE-20260708-02` for the second, `-03` for the third, etc. Omit the sequence for the first (normal) case.
+
+Do **not** use random characters — the ID must be deterministic, meaningful, and reconstructable from the metadata.
 
 Include this ID prominently in the document header and filename.
 
+### Structured output (machine-readable sidecar)
+
+Alongside the markdown document, produce the structured working file `TS-{PERIOD}-{TEAM}-{YYYYMMDD}.yaml` (the same file maintained incrementally during the session — see *Working state & resumability*). This is the source of truth the markdown is generated from, and the artifact the Phase 7 coordinator ingests. Use exactly these keys:
+
+```yaml
+submission_id: TS-Q1-2026-DATASCIENCE-20260708
+generated_date: 2026-07-08          # YYYY-MM-DD, the date the doc was generated
+review_status: Drafted
+confidential: true
+
+# Phase 1 — session metadata
+submitter_name:
+submitter_role:
+submitter_email:
+team:
+reporting_period:
+technical_owner:                    # session-level; name, role, email
+
+# Phase 2 — screening
+ip_generated_this_period:           # true | false  (false → nil return, items: [])
+
+items:
+  - item_number: 1
+    candidate_title:
+    business_owner_team:
+    technical_owner:                # name, role, team
+    trade_secret_awareness:
+    plain_language_description:
+    problem_solved:
+    where_used:
+    novel_differentiating_aspects:
+    confidential_elements:
+    inventors_contributors:
+    source_locations:               # links / paths only
+    external_disclosure:            # true | false
+    dissemination_history:
+    risk_if_disclosed:
+    recommended_ip_treatment:
+    confidentiality_controls:
+    ai_use_restriction:
+    codebase_reference:             # optional
+    codebase_assisted_summary:      # optional
+    escalation_notes:
+```
+
+For a nil return, set `ip_generated_this_period: false` and `items: []`. Keep the YAML and the markdown in sync — never let one carry a field the other lacks.
+
 ### Document format
 
-Generate a **complete submission document** in markdown that can be copied into Word or exported as `.docx` if the user has document generation available.
+Generate a **complete submission document** in markdown from the YAML. It can be copied into Word or exported as `.docx` if the user has document generation available.
 
 Use this structure:
 
@@ -410,66 +479,7 @@ Use this structure:
 
 ## Item 1: [candidate_title]
 
-| # | Field | Response |
-|---|-------|----------|
-| Q1 | Candidate title | |
-| Q2 | Business owner / team | |
-| Q3 | Technical owner | |
-| Q4 | Trade secret awareness | |
-| Q5 | Plain-language description | |
-| Q6 | Problem solved / where used | |
-| Q7 | Novel / differentiating aspects | |
-| Q8 | Confidential elements | |
-| Q9 | Inventors and contributors | |
-| Q10 | Source locations | |
-| Q11 | External disclosure | |
-| Q12 | Disclosure details | |
-| Q13 | Risk if disclosed | |
-| Q14 | Recommended IP treatment | |
-| Q15 | Confidentiality controls | |
-| Q16 | AI-use restriction | |
-
-### Plain-language description
-...
-
-### Problem solved
-...
-
-### Where used
-...
-
-### Novel / differentiating aspects
-...
-
-### Confidential elements
-...
-
-### Inventors and contributors
-...
-
-### Source locations
-...
-
-### Dissemination history
-...
-
-### Risk if disclosed
-...
-
-### Recommended IP treatment
-...
-
-### Confidentiality controls
-...
-
-### AI-use restriction
-...
-
-### Codebase-assisted summary (if applicable)
-...
-
-### Escalation notes
-...
+[Full Q1–Q16 responses in structured sections]
 
 [Repeat for Item 2, Item 3, etc.]
 
@@ -487,7 +497,9 @@ I confirm that this submission is accurate to the best of my knowledge and does 
 *CONFIDENTIAL — GSTS internal use only. Route to technical owner review, then IP Officer / Document Control Officer / CAIO.*
 ```
 
-**Filename suggestion:** `TS-H1-2026-DATASCIENCE-A7F3.md` (or `.docx` if exported)
+**Filenames:**
+- `TS-Q1-2026-DATASCIENCE-20260708.yaml` (source of truth)
+- `TS-Q1-2026-DATASCIENCE-20260708.md` (human review artifact)
 
 ---
 
@@ -497,13 +509,17 @@ End every session with these instructions (update the upload location when Docum
 
 > **Your submission is complete.**
 >
-> 1. Save the generated document using the Submission ID in the filename.
-> 2. Upload it to the designated GSTS submission location:
->    - **[UPDATE: SharePoint folder / Document Control upload path]**
-> 3. Set the document marking to **CONFIDENTIAL**.
-> 4. Notify your **technical owner** that a draft has been submitted for accuracy review.
-> 5. The draft will be reviewed (Technical review → IP review → Approved).
-> 6. Do not distribute this document outside the approved review group.
+> **Upload these files** to the designated GSTS submission location:
+> - `TS-{PERIOD}-{TEAM}-{YYYYMMDD}.yaml` ← **required** (machine-readable, used for aggregation)
+> - `TS-{PERIOD}-{TEAM}-{YYYYMMDD}.md` ← human-readable review copy
+> - `.docx` export if you generated one
+>
+> **Upload to:** **[UPDATE: SharePoint folder / Document Control upload path]**
+>
+> 1. Set all files to **CONFIDENTIAL**.
+> 2. Notify your **technical owner** that a draft has been submitted for accuracy review.
+> 3. The draft will be reviewed (Technical review → IP review → Approved).
+> 4. Do not distribute outside the approved review group.
 >
 > **Submission ID:** [repeat the ID]
 >
@@ -517,15 +533,17 @@ End every session with these instructions (update the upload location when Docum
 
 After all teams have submitted for one reporting period:
 
-1. Collect all submission documents from the upload location.
-2. Verify each has a unique Submission ID and covers the same reporting period.
-3. Merge into one **Period Trade Secret Register** containing:
+1. Collect all submission **`.yaml` sidecars** from the upload location (glob `TS-*-*.yaml`). Prefer the YAML over the markdown — it is machine-readable, so aggregation is a simple load-and-merge rather than scraping prose tables. The markdown docs are retained for human review.
+2. Verify each has a unique `submission_id` and that `reporting_period` matches the period being aggregated.
+3. Merge into one **Period Trade Secret Register** by loading every sidecar and concatenating their `items`. The register contains:
    - Period metadata
-   - Table of all submission IDs by team
-   - Full text or summaries of each item
-   - Combined review status tracker
+   - Table of all submission IDs by team (from `submission_id` / `team`)
+   - Each item's fields (from the keyed YAML — no re-parsing of prose)
+   - Combined `review_status` tracker
 4. Route the aggregated document to IP Officer / Document Control Officer / CAIO for period review.
 5. Update the master trade-secret register status fields.
+
+*Because every submission uses the same YAML schema (Phase 5), the merge can be scripted deterministically — no per-document manual extraction.*
 
 ---
 
@@ -534,13 +552,13 @@ After all teams have submitted for one reporting period:
 When a team member opens Claude, they should:
 
 1. Start a **new Claude session** in an **approved GSTS Claude environment**.
-2. Attach or reference this `CLAUDE.md` file (or add it to a Claude Project).
+2. Attach or reference this `CLAUDE.md` file (or run `/trade-secret-intake` if the Skill is installed).
 3. Say:
 
    > "Please run the GSTS Trade Secret and IP intake interview from the attached CLAUDE.md guide. Start with Phase 1."
 
-4. Answer questions one at a time.
-5. Save and upload the generated document at the end.
+4. Answer questions one at a time (or approve draft answers if codebase was provided up front).
+5. Save and upload **both** `.yaml` and `.md` files at the end.
 
 ---
 
@@ -568,29 +586,6 @@ When a team member opens Claude, they should:
 Plus session metadata (Phase 1): submitter, team, period, technical owner.  
 Plus period screening (Phase 2): any IP generated this period?
 
-## Quick reference — field list
-
-| Field | Required |
-|-------|----------|
-| submitter_name, role, email | Yes |
-| team | Yes |
-| reporting_period | Yes |
-| technical_owner | Yes |
-| candidate_title | Per item |
-| plain_language_description | Per item |
-| where_used | Per item |
-| novel_differentiating_aspects | Per item |
-| confidential_elements | Per item |
-| inventors_contributors | Per item |
-| source_locations | Per item |
-| dissemination_history | Per item |
-| confidentiality_controls | Per item |
-| ai_use_restriction | Per item |
-| risk_if_disclosed | Per item |
-| recommended_ip_treatment | Per item |
-| escalation_notes | If applicable |
-| submission_id | Auto-generated |
-
 ---
 
-*End of CLAUDE.md — GSTS Trade Secret & IP Intake v1.0*
+*End of CLAUDE.md — GSTS Trade Secret & IP Intake v1.1 (Harry Singh updates)*
