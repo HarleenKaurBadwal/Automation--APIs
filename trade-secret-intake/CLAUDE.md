@@ -1,9 +1,11 @@
 # GSTS Trade Secret & IP Intake — Claude Interview Guide
 
-**Version:** 1.2  
-**Status:** CONFIDENTIAL — GSTS internal use only  
+**Version:** 1.0 — Final deployment release (July 2026)  
+**Status:** CONFIDENTIAL — GSTS internal use only — **approved for first deployment to GSTS Claude server**  
 **Audience:** Technical staff (Data Science, Engineering, Product)  
 **Purpose:** Guide a Claude session to collect trade secret / IP information for a reporting period and produce a draft submission document.
+
+> **Deployment note:** This is the **final draft for first-time org deployment**. Do not redeploy unless a formal v1.1+ update is approved by Ana / IP governance. Submit change requests to Harleen / Heather.
 
 ---
 
@@ -678,4 +680,4 @@ Plus period screening (Phase 2): any IP generated this period?
 
 ---
 
-*End of CLAUDE.md — GSTS Trade Secret & IP Intake v1.1 (Harry Singh updates)*
+*End of CLAUDE.md — GSTS Trade Secret & IP Intake v1.0 FINAL deployment release (July 2026)*

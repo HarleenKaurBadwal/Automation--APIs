@@ -1,10 +1,10 @@
 ---
 name: trade-secret-intake
-description: Use when a GSTS team member needs to complete the Trade Secret and IP intake interview for a reporting period. Conducts the full guided intake (metadata, period screening, codebase-up-front option, 16 standard questions per IP item), maintains a resumable YAML working file, generates CONFIDENTIAL .yaml + .md submission documents with deterministic Submission ID (TS-PERIOD-TEAM-YYYYMMDD), and instructs the user which files to upload. Use for trade secret intake, IP disclosure, GSTS IP submission, or /trade-secret-intake.
+description: FINAL deployment release (July 2026). Use when a GSTS team member needs to complete the Trade Secret and IP intake interview for a reporting period. Conducts the full guided intake (metadata, period screening, codebase-up-front option, 16 standard questions per IP item plus category), maintains a resumable YAML working file, generates CONFIDENTIAL .yaml + .md submission documents with deterministic Submission ID (TS-PERIOD-TEAM-YYYYMMDD). Use for trade secret intake, IP disclosure, GSTS IP submission, or /trade-secret-intake.
 disable-model-invocation: true
 ---
 
-# GSTS Trade Secret & IP Intake Skill v1.2
+# GSTS Trade Secret & IP Intake Skill v1.0 — FINAL deployment release
 
 Follow `CLAUDE.md` in this skill folder if present; otherwise follow these instructions exactly.
 
@@ -21,13 +21,29 @@ Follow `CLAUDE.md` in this skill folder if present; otherwise follow these instr
 - On start: check for existing working file → resume if found.
 - YAML = source of truth. Markdown generated from YAML at end.
 
+## Interview conduct
+
+- **One item at a time, one question at a time** — say this upfront; never dump all drafts at once
+- **Warm-up:** 20–40 min per item; bi-monthly deadline; explain technical owner + handover
+- **Draft-then-confirm:** if codebase/diagrams provided → draft Q1–Q16 internally → show **one draft at a time** for confirm/adjust
+- **Edits:** user can always edit answers; update YAML only during interview; generate `.md` **once at end** — do not keep rewriting doc mid-interview
+- **Inputs:** codebase, links, images, draw.io diagrams (links in output; no sensitive embeds unless user requests)
+
+## Technical owner
+
+Person who explains the asset and reviews draft for accuracy. Support **handover**: someone completing on behalf of owner → record `completion_mode: handover`.
+
+## Trade secret examples (when user is unsure)
+
+Model logic, feature engineering, data fusion pipelines, architecture/deployment, evaluation methods, operational workflows, technical diagrams.
+
 ## Flow
 
-1. **Phase 1:** submitter name/role/email, team, reporting period, technical owner
+1. **Opening:** warm-up + timeline + conduct rules
+2. **Phase 1:** submitter, team, period, completion mode, technical owner
 2. **Phase 2:** any IP/trade secret this period? (yes/no/not sure)
 3. **Phase 3 per item:**
-   - **Up front:** offer codebase/repo path → review → draft answers → user approves
-   - Q1, Q1b (category), Q2–Q16 (confirm drafts or ask one at a time)
+   - **Up front:** codebase/docs/diagrams → draft answers → **one question at a time** confirm/adjust
    - Q9: optional git contributor cross-check if repo provided
    - Write each answer to YAML immediately
    - More items? loop
