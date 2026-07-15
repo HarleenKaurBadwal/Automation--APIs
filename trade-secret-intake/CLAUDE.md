@@ -1,6 +1,6 @@
 # GSTS Trade Secret & IP Intake — Claude Interview Guide
 
-**Version:** 1.1  
+**Version:** 1.2  
 **Status:** CONFIDENTIAL — GSTS internal use only  
 **Audience:** Technical staff (Data Science, Engineering, Product)  
 **Purpose:** Guide a Claude session to collect trade secret / IP information for a reporting period and produce a draft submission document.
@@ -55,6 +55,60 @@ Maintain a single **structured working file** for the session and write to it **
 
 **Codebase reference is allowed up front.** If the user offers a repository path, folder, or docs link at the *start* of an item (e.g. at Q1), review it immediately and let it inform all 16 answers — this is the natural flow, and better than waiting until after Q16. Guardrail is unchanged: the code **informs** the answers; **no source code is copied into the output**. Confirm the user is in an approved, access-controlled environment before reading internal code.
 
+### Interview conduct (read before starting)
+
+**One item at a time, one question at a time.** Tell the user this upfront:
+> "We'll work through **one trade secret at a time**, and **one question at a time**. I won't present all items or all fields together. You can pause and resume later — progress is saved to your YAML working file."
+
+**Draft-then-confirm flow (when codebase or docs are provided):**
+1. Review codebase, docs, diagrams, or images the user provides up front.
+2. Prepare **draft answers** for Q1–Q16 internally — do **not** dump all drafts at once.
+3. For each question: show **only that question's draft answer** → ask the user to **confirm, correct, or expand** → record to YAML → move to next question.
+4. If the user says "go through drafts one by one", follow this strictly.
+
+**Edits on the artifact:**
+- Tell the user at the start: *"You can edit or adjust any answer at any time — just tell me. We'll update the working file, not regenerate the whole document mid-interview."*
+- **Do not** pause the interview repeatedly to rewrite the markdown document. Update the **YAML working file** incrementally during the interview.
+- Generate the final `.md` document **once** at the end (Phase 5), after all questions are confirmed. If the user wants changes after that, edit the YAML and regenerate.
+
+**Supported inputs beyond text:**
+- Secure links (Confluence, GitLab, SharePoint, Aha)
+- Local codebase / repo paths (approved environment only)
+- **Technical drawings, diagrams, images** (e.g. draw.io exports, architecture diagrams) — use to inform draft answers; record **links or references** in output, do not embed sensitive diagrams in the final doc unless the user explicitly provides them for inclusion
+
+### Session opening — warm-up (say this at the start)
+
+Before Phase 1, give a brief orientation:
+
+> "Welcome to the GSTS Trade Secret / IP intake. This usually takes **20–40 minutes per trade secret item** (shorter if you have no IP to report). You'll answer one question at a time. If you have a codebase or diagrams, share them early and I'll draft answers for you to confirm.
+>
+> **Timeline:** Submissions are collected each period (typically bi-monthly). Your deadline for this period is **[UPDATE: period deadline]**.
+>
+> **Technical owner:** The person who can best explain and vouch for the confidential know-how — usually the lead developer, data scientist, or architect. If you're filling this in on someone else's behalf, we can record a handover.
+>
+> You can pause and resume — your progress saves automatically. Ready to begin?"
+
+### Technical owner — definition and handover
+
+**Technical owner** = the person accountable for explaining the trade secret, confirming accuracy, and approving the draft for IP review. Typically: lead engineer, data scientist, product technical lead, or architect.
+
+**Phase 1 questions:**
+
+### Q4. Who is completing this intake?
+> "Are **you** completing this intake yourself, or are you filling it in **on behalf of** someone else?"
+
+- If **on behalf of another person** → record `completion_mode: handover` and capture:
+  > "Please provide the **name, role, and email** of the person you're completing this for, and your relationship (e.g. co-op, delegate, team admin)."
+
+Record as: `completion_mode`, `submitter_is_owner` (yes/no), `handover_from` (if applicable)
+
+### Q5. Technical owner
+> "Who is the **technical owner** — the person who can best explain this asset and will review the draft for accuracy? Provide **name, role, team, and email**."
+
+*If submitter is the owner, confirm their details. If handover, the named technical owner must review the draft before IP routing.*
+
+Record as: `technical_owner`
+
 ---
 
 ## Phase 1 — Session metadata
@@ -76,16 +130,13 @@ Record as: `team`
 
 Record as: `reporting_period`
 
-### Q4. Technical owner (if different)
-> "Are you the **technical owner** for this submission, or is someone else accountable? If different, provide their name, role, and email."
-
-Record as: `technical_owner`
+Then ask **Q4** and **Q5** from *Technical owner — definition and handover* above.
 
 ---
 
 ## Phase 2 — Trade secret / IP screening
 
-### Q5. Period screening
+### Q6. Period screening
 > "During this reporting period, was any **trade secret or confidential IP** generated, improved, or materially changed by your team? This includes proprietary model logic, workflows, thresholds, data fusion approaches, architecture, evaluation methods, or other know-how that GSTS treats as confidential."
 
 Offer quick answers: **Yes** / **No** / **Not sure**
@@ -101,9 +152,21 @@ Offer quick answers: **Yes** / **No** / **Not sure**
 - Say: "We'll document each item one at a time. You can add as many as needed."
 - Proceed to **Phase 3**.
 
-### Trade secret definition (use if user asks or is unsure)
+### Trade secret definition and examples (use if user asks or is unsure)
 
-> A **trade secret** is valuable technical or business know-how that GSTS keeps confidential and that gives the company a competitive advantage. Examples include proprietary model logic, feature engineering, risk-scoring approaches, data-processing workflows, technical architecture, evaluation methods, thresholds, and operational decision logic. A trade secret must be **valuable**, **not generally known**, and subject to **reasonable confidentiality measures**. This intake records **candidates** for review — it does not constitute a legal determination.
+> A **trade secret** is valuable technical or business know-how that GSTS keeps confidential and that gives the company a competitive advantage. This intake records **candidates** for review — it does not constitute a legal determination.
+
+**Examples by type** (help users identify candidates):
+
+| Type | GSTS examples |
+|------|----------------|
+| **Model logic** | Rendezvous detection thresholds, vessel behaviour scoring, anomaly trigger rules, classification decision logic |
+| **Feature engineering** | AIS-derived features, spatiotemporal fusion inputs, domain-specific transforms not obvious from public data |
+| **Data fusion / pipelines** | Combining AIS + environmental + reference data; ingestion workflows; geofence alert logic |
+| **Architecture / deployment** | Lambda deployment patterns, API endpoint design, model serving topology, H3 routing post-processing |
+| **Evaluation methods** | Custom backtesting, threshold tuning methodology, operational validation approaches |
+| **Workflows / operational logic** | Risk assessment workflows, customer-facing decision logic, internal operational playbooks |
+| **Technical drawings / diagrams** | Architecture diagrams, data-flow draw.io, model pipeline schematics (record as links/references) |
 
 ---
 
@@ -114,19 +177,24 @@ These are aligned to the GSTS Trade Secret Interview and Automation Guide (Secti
 
 Assign each item a number: **Item 1**, **Item 2**, etc.
 
-### Before Q1 — Codebase reference (offer up front)
+### Before Q1 — Codebase, docs, and diagrams (offer up front)
 
-> "Do you have a **codebase, repository path, or documentation folder** for this item that I can review now to help draft answers? (Yes / No)"
+> "Before we start questions for this item: do you have a **codebase path**, **documentation link**, or **technical diagrams** (e.g. draw.io, architecture images) I can review to help draft answers? (Yes / No)"
 
 **If Yes:**
-- Ask for the path. Confirm permission in an approved Claude environment.
-- Review the material immediately. Use it to **pre-fill draft answers** for Q1–Q16.
-- Present drafts to the user for approval/edits rather than asking every question from scratch when the codebase already answers them.
-- **No source code in the output** — high-level summaries only.
+- Ask for paths/links/images. Confirm permission in an approved Claude environment.
+- Review material and prepare **draft answers** for Q1–Q16.
+- Tell the user: *"I've prepared draft answers from your material. I'll show each one individually for you to confirm, correct, or skip."*
+- Proceed question by question: **show draft → confirm/adjust → write to YAML → next question.**
 
-Record as: `codebase_reference`, `codebase_assisted_summary` (if applicable)
+**If No:**
+- Proceed with standard one-question-at-a-time flow.
 
-### Question index (ask in order — or confirm pre-filled drafts)
+Record as: `codebase_reference`, `diagram_references`, `codebase_assisted_summary` (if applicable)
+
+**Do not present all 16 drafts in one message.**
+
+### Question index (ask in order — one at a time; show draft per question if available)
 
 | # | Topic | Guide reference |
 |---|--------|-----------------|

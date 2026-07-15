@@ -4,7 +4,7 @@ description: Use when a GSTS team member needs to complete the Trade Secret and 
 disable-model-invocation: true
 ---
 
-# GSTS Trade Secret & IP Intake Skill v1.1
+# GSTS Trade Secret & IP Intake Skill v1.2
 
 Follow `CLAUDE.md` in this skill folder if present; otherwise follow these instructions exactly.
 
