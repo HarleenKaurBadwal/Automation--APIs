@@ -1,0 +1,6 @@
+pandas
+openpyxl
+requests
+et_xmlfile
+anthropic
+python-pptx
