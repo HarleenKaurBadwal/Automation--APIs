@@ -1,0 +1,94 @@
+{
+  "playbooks": [
+    {
+      "id": "password_reset",
+      "title": "Password reset",
+      "intents": ["password_reset", "forgot_password", "change_password"],
+      "keywords": [
+        "password",
+        "passwd",
+        "forgot password",
+        "reset password",
+        "change password",
+        "can't log in",
+        "cannot log in",
+        "cant log in",
+        "login password"
+      ],
+      "auto_fixable": true,
+      "steps": [
+        "Open the Ociana sign-in page.",
+        "Select Forgot password.",
+        "Enter the work email tied to your Ociana account.",
+        "Open the reset email (check spam) and set a new password that meets the policy.",
+        "Sign in again. If it still fails after one successful reset, ask me to open a ticket."
+      ],
+      "escalation_hint": "If reset email never arrives, or login still fails after a successful reset, I can create a Jira ticket for Identity & Access."
+    },
+    {
+      "id": "account_unlock",
+      "title": "Account unlock",
+      "intents": ["account_unlock", "locked_out"],
+      "keywords": [
+        "locked",
+        "locked out",
+        "account locked",
+        "too many attempts",
+        "unlock account",
+        "disabled account"
+      ],
+      "auto_fixable": true,
+      "steps": [
+        "Wait 15 minutes — temporary lockouts often clear automatically.",
+        "Confirm you are using the correct work email (not a personal alias).",
+        "Try Forgot password if you may have mistyped the password repeatedly.",
+        "If the account stays locked after 15 minutes, ask me to create a ticket."
+      ],
+      "escalation_hint": "Persistent lockouts need Identity & Access — I can open a Jira ticket."
+    },
+    {
+      "id": "mfa_reset",
+      "title": "MFA / authenticator help",
+      "intents": ["mfa_reset", "2fa", "authenticator"],
+      "keywords": [
+        "mfa",
+        "2fa",
+        "two factor",
+        "authenticator",
+        "otp",
+        "verification code",
+        "duo",
+        "one-time code"
+      ],
+      "auto_fixable": true,
+      "steps": [
+        "Confirm the device clock is set to automatic time (wrong time breaks codes).",
+        "Open your authenticator app and use the newest code for Ociana / GSTS SSO.",
+        "If you lost the device, say \"create ticket for MFA reset\" and I will open an Identity & Access ticket."
+      ],
+      "escalation_hint": "Lost-device MFA resets always need a human-approved ticket."
+    },
+    {
+      "id": "browser_cache",
+      "title": "Page / session glitches",
+      "intents": ["cache_clear", "session_issue"],
+      "keywords": [
+        "blank page",
+        "white screen",
+        "won't load",
+        "page not loading",
+        "session expired",
+        "keep refreshing",
+        "cache"
+      ],
+      "auto_fixable": true,
+      "steps": [
+        "Hard-refresh the browser (Ctrl/Cmd+Shift+R).",
+        "Try an private/incognito window.",
+        "Clear site cookies for the Ociana domain, then sign in again.",
+        "If the issue continues on another browser/network, ask me to open a ticket with the URL and approximate time."
+      ],
+      "escalation_hint": "Include the page URL and time of the issue when escalating."
+    }
+  ]
+}

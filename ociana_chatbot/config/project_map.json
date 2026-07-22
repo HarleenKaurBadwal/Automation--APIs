@@ -1,0 +1,31 @@
+{
+  "default_project_key": "SUP",
+  "projects": [
+    {
+      "key": "SUP",
+      "name": "Ociana Support",
+      "aliases": ["ociana", "support", "helpdesk", "general"]
+    },
+    {
+      "key": "SLUMS",
+      "name": "SLUMS",
+      "aliases": ["slums", "slum"]
+    },
+    {
+      "key": "PORT",
+      "name": "Port Operations",
+      "aliases": ["port", "ports", "terminal", "harbour", "harbor"]
+    },
+    {
+      "key": "VES",
+      "name": "Vessel Tracking",
+      "aliases": ["vessel", "vessels", "ais", "tracking", "ship"]
+    },
+    {
+      "key": "AUTH",
+      "name": "Identity & Access",
+      "aliases": ["auth", "login", "sso", "identity", "access", "account"]
+    }
+  ],
+  "notes": "Replace project keys/aliases with your real Jira project keys. Managers get tickets routed by detected project keywords."
+}

@@ -1,0 +1,78 @@
+{
+  "name": "Ociana Chatbot → Jira",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ociana-chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-ociana-chat",
+      "name": "Ociana Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [260, 300],
+      "webhookId": "ociana-chat"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.OCIANA_CHATBOT_URL}}/v1/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "={{$env.OCIANA_CHATBOT_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{$json.body.message || $json.message}}\",\n  \"user_email\": \"{{$json.body.user_email || $json.user_email || ''}}\",\n  \"user_name\": \"{{$json.body.user_name || $json.user_name || ''}}\",\n  \"project_hint\": \"{{$json.body.project_hint || $json.project_hint || ''}}\",\n  \"conversation_id\": \"{{$json.body.conversation_id || $json.conversation_id || ''}}\",\n  \"force_ticket\": {{$json.body.force_ticket || false}},\n  \"metadata\": {\n    \"source\": \"n8n-ociana-webhook\"\n  }\n}",
+        "options": {}
+      },
+      "id": "http-chatbot",
+      "name": "Call Ociana Chatbot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {}
+      },
+      "id": "respond-to-ociana",
+      "name": "Respond to Ociana",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [780, 300]
+    }
+  ],
+  "connections": {
+    "Ociana Webhook": {
+      "main": [[{ "node": "Call Ociana Chatbot", "type": "main", "index": 0 }]]
+    },
+    "Call Ociana Chatbot": {
+      "main": [[{ "node": "Respond to Ociana", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "description": "Webhook bridge so Ociana (or any chat UI) can call the support chatbot which auto-fixes common issues or creates Jira tickets."
+  },
+  "tags": [
+    { "name": "ociana" },
+    { "name": "jira" }
+  ]
+}
