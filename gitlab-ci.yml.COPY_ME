@@ -1,0 +1,44 @@
+# Paste this EXACTLY into a new file named: .gitlab-ci.yml
+# (repo root of https://gitlab.com/gsts.ca/ociana/ociana-planning)
+
+stages:
+  - generate
+
+generate_reports:
+  stage: generate
+  image: python:3.11-slim
+
+  variables:
+    QBO_FILE: "inputs/qbo_actuals.xlsx"
+    ALLOC_FILE: "inputs/prism_allocation.xlsx"
+    CONTRACTOR_FILE: "inputs/GSTS_Contractor_Hours_by_Project.xlsx"
+    OUTPUT_FILE: "GSTS_Portfolio_Report.xlsx"
+    OUTPUT_HTML: "GSTS_LoE_Dashboard.html"
+
+  before_script:
+    - pip install --quiet requests pandas openpyxl python-pptx anthropic et_xmlfile
+    - echo "Input files:"
+    - ls -la inputs/ || echo "WARNING: inputs/ missing"
+
+  script:
+    - echo "=== HTML dashboard ==="
+    - python3 report_html.py
+    - echo "=== Excel + PowerPoint ==="
+    - python3 report_final_v3.py
+    - echo "=== Outputs ==="
+    - ls -lh GSTS_LoE_Dashboard.html GSTS_Portfolio_Report.xlsx GSTS_Portfolio_Slides.pptx || true
+
+  artifacts:
+    name: "GSTS-Portfolio-$CI_PIPELINE_IID-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - GSTS_LoE_Dashboard.html
+      - GSTS_Portfolio_Report.xlsx
+      - GSTS_Portfolio_Slides.pptx
+    expire_in: 8 weeks
+    when: always
+
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: manual
