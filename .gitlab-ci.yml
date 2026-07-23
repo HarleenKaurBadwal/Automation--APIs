@@ -1,0 +1,64 @@
+# .gitlab-ci.yml
+# GSTS Portfolio Report — weekly generate (Excel + HTML + PowerPoint)
+#
+# Hosting note: this pipeline GENERATES files as GitLab artifacts.
+# Publishing to https://reports.gsts.ca (Azure SWA) is a separate step
+# (Phil/IT) — do not replace Azure hosting with GitLab Pages unless IT agrees.
+#
+# Repo: https://gitlab.com/gsts.ca/ociana/ociana-planning  (use THIS project — Casey)
+#
+# One-time setup:
+#   1. Add these files to the repo root (see GITLAB_SETUP.md)
+#   2. Settings → CI/CD → Variables (masked):
+#        AHA_API_KEY
+#        AHA_SUBDOMAIN          e.g. ociana
+#        ANTHROPIC_API_KEY
+#        GITLAB_TOKEN           (or GL_API_TOKEN — see script)
+#   3. Put latest input Excels under inputs/ (see README)
+#   4. Build → Pipeline schedules → New schedule
+#        Cron: 30 11 * * 1     (Monday 11:30 UTC ≈ 7:30am ET)
+#        Target branch: main
+#        Active: on
+
+stages:
+  - generate
+
+generate_reports:
+  stage: generate
+  image: python:3.11-slim
+
+  variables:
+    # Scripts read these env vars (also set real secrets in CI/CD Variables UI)
+    QBO_FILE: "inputs/qbo_actuals.xlsx"
+    ALLOC_FILE: "inputs/prism_allocation.xlsx"
+    CONTRACTOR_FILE: "inputs/GSTS_Contractor_Hours_by_Project.xlsx"
+    OUTPUT_FILE: "GSTS_Portfolio_Report.xlsx"
+    OUTPUT_HTML: "GSTS_LoE_Dashboard.html"
+
+  before_script:
+    - pip install --quiet requests pandas openpyxl python-pptx anthropic et_xmlfile
+    - echo "Input files:"
+    - ls -la inputs/ || echo "WARNING: inputs/ missing — QBO/contractor/allocation will fail"
+
+  script:
+    - echo "=== HTML dashboard ==="
+    - python3 report_html.py
+    - echo "=== Excel + PowerPoint ==="
+    - python3 report_final_v3.py
+    - echo "=== Outputs ==="
+    - ls -lh GSTS_LoE_Dashboard.html GSTS_Portfolio_Report.xlsx GSTS_Portfolio_Slides.pptx || true
+
+  artifacts:
+    name: "GSTS-Portfolio-$CI_PIPELINE_IID-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - GSTS_LoE_Dashboard.html
+      - GSTS_Portfolio_Report.xlsx
+      - GSTS_Portfolio_Slides.pptx
+    expire_in: 8 weeks
+    when: always
+
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: manual

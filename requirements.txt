@@ -1,6 +1,6 @@
+requests
 pandas
 openpyxl
-requests
-et_xmlfile
-anthropic
 python-pptx
+anthropic
+et_xmlfile
