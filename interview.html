@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GSTS Trade Secret Intake</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --primary: #1a3a5c;
+      --primary-light: #2d5a8e;
+      --accent: #e8f0fe;
+      --border: #d0d7de;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --bot-bg: #f0f4f8;
+      --user-bg: #1a3a5c;
+      --user-text: #ffffff;
+      --warn-bg: #fff8e1;
+      --warn-border: #f9a825;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      padding: 1rem 1.5rem;
+      text-align: center;
+    }
+
+    header h1 { font-size: 1.15rem; font-weight: 600; }
+    header p { font-size: 0.8rem; opacity: 0.85; margin-top: 0.25rem; }
+
+    .notice {
+      width: 100%;
+      max-width: 720px;
+      background: var(--warn-bg);
+      border-bottom: 1px solid var(--warn-border);
+      padding: 0.6rem 1rem;
+      font-size: 0.78rem;
+      color: #5d4037;
+      text-align: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 720px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 0.75rem;
+    }
+
+    .progress-bar {
+      background: var(--border);
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: var(--primary-light);
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .progress-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    #chat {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      overflow-y: auto;
+      min-height: 380px;
+      max-height: 55vh;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .msg {
+      max-width: 88%;
+      padding: 0.65rem 0.9rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .msg.bot {
+      background: var(--bot-bg);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg.user {
+      background: var(--user-bg);
+      color: var(--user-text);
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-end;
+    }
+
+    #userInput {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      resize: none;
+      min-height: 44px;
+      max-height: 120px;
+      line-height: 1.4;
+    }
+
+    #userInput:focus {
+      outline: 2px solid var(--primary-light);
+      border-color: transparent;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    button:hover { background: var(--primary-light); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { background: var(--accent); }
+
+    #donePanel {
+      display: none;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      gap: 0.75rem;
+      flex-direction: column;
+    }
+
+    #donePanel.visible { display: flex; }
+
+    #donePanel h2 { font-size: 1rem; color: var(--primary); }
+    #donePanel p { font-size: 0.85rem; color: var(--muted); }
+
+    footer {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>GSTS Trade Secret Intake</h1>
+  <p>Confidential — guided documentation interview</p>
+</header>
+
+<div class="notice">
+  Do not paste source code, algorithms, customer-sensitive data, or defence-sensitive information.
+  Provide plain-language answers and secure links only.
+</div>
+
+<div class="container">
+  <div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">Starting…</div>
+  </div>
+
+  <div id="chat"></div>
+
+  <div class="input-area" id="inputArea">
+    <textarea id="userInput" rows="1" placeholder="Type your answer…"></textarea>
+    <button id="sendBtn" onclick="submitAnswer()">Send</button>
+  </div>
+
+  <div class="btn-row" id="quickBtns" style="display:none;"></div>
+
+  <div id="donePanel">
+    <h2>Intake complete</h2>
+    <p>Your responses have been recorded. A draft will be prepared for technical review.</p>
+    <div class="btn-row" style="justify-content:center;">
+      <button onclick="downloadRecord()">Download draft record (JSON)</button>
+      <button class="btn-secondary" onclick="copyRecord()">Copy to clipboard</button>
+    </div>
+  </div>
+</div>
+
+<footer>CONFIDENTIAL — GSTS internal use only. Status: Drafted → Technical review → IP review</footer>
+
+<script>
+  // ── Interview questions ──────────────────────────────────────────────
+  // Each step: { field, question, hint?, yesNo?, branch? }
+  const STEPS = [
+    {
+      field: "candidate_title",
+      question: "What capability, method, model, or workflow are we documenting today?\n\nPlease provide a short, clear title.",
+    },
+    {
+      field: "is_technical_owner",
+      question: "Are you the technical owner — the person who can best explain this asset?",
+      yesNo: true,
+      branch: {
+        yes: {
+          field: "technical_owner",
+          question: "Please confirm your name, role, and team as the technical owner.",
+        },
+        no: {
+          field: "technical_owner",
+          question: "Who is the technical owner? Please provide their name, role, and team.",
+        },
+      },
+    },
+    {
+      field: "knows_trade_secret",
+      question: "Do you know what we mean by a \"trade secret\" in this context?",
+      yesNo: true,
+      branch: {
+        no: {
+          field: "_trade_secret_definition_shown",
+          question:
+            "A trade secret is valuable know-how that GSTS keeps confidential — such as model logic, workflows, thresholds, data fusion, architecture, or evaluation methods that give us a competitive edge.\n\nWe are recording candidates for review, not making a legal determination today.\n\nLet's continue with the documentation.",
+          autoAdvance: true,
+        },
+      },
+    },
+    {
+      field: "business_owner_team",
+      question: "Which team is accountable for this asset?\n\n(e.g. Data Science, Engineering, Product, AI Governance)",
+    },
+    {
+      field: "plain_description",
+      question: "In plain language, what is this asset and what problem does it solve?",
+      hint: "No code — describe what it does and why it exists.",
+    },
+    {
+      field: "where_used",
+      question: "Where is it used?\n\n(e.g. OCIANA module, ORCA/API endpoint, pipeline, product feature, customer use case, internal process)",
+    },
+    {
+      field: "novel_aspects",
+      question: "What makes this approach valuable or difficult for a competitor to reproduce?",
+      hint: "Think: unique data combinations, domain know-how, feature engineering, thresholds, evaluation methods.",
+    },
+    {
+      field: "confidential_elements",
+      question: "What are the main confidential elements?\n\n(e.g. algorithm logic, model features, thresholds, decision logic, architecture, data pipeline, evaluation method, tuning choices, operational workflow)",
+      hint: "High-level only — do not paste code or detailed implementation.",
+    },
+    {
+      field: "risk_if_disclosed",
+      question: "What would happen if this information became public or was used by a competitor?\n\n(commercial, operational, customer trust, security, or IP impact)",
+    },
+    {
+      field: "contributors",
+      question: "Who contributed to developing or improving this?\n\nInclude names, roles, contribution type, and approximate dates if known.",
+    },
+    {
+      field: "source_locations",
+      question: "Where is this implemented or documented?\n\nPlease provide secure links only — Confluence, GitLab, SharePoint, Aha, model docs, API docs.",
+      hint: "Links only. Do not paste code.",
+    },
+    {
+      field: "source_locations_followup",
+      question: "If there is no single page, where would someone with access find the evidence?",
+      hint: "Type \"none\" or \"N/A\" if everything is covered above.",
+    },
+    {
+      field: "external_disclosure",
+      question: "Has any part of this been shared outside GSTS?\n\n(e.g. customer demos, proposals, partners, universities, funding applications, marketing, conferences, publications)",
+      yesNo: true,
+      branch: {
+        yes: {
+          field: "dissemination_history",
+          question: "For each disclosure: was it public or confidential? When, to whom, under NDA/contract, and what was actually shared?",
+        },
+        no: {
+          field: "dissemination_history",
+          question: null,
+          autoAdvance: true,
+          defaultValue: "No known external disclosure.",
+        },
+      },
+    },
+    {
+      field: "confidentiality_controls",
+      question: "What controls protect this today?\n\n(e.g. access limits, restricted repos, confidential labels, NDAs, need-to-know access, review cadence)",
+    },
+    {
+      field: "ai_use_restriction",
+      question: "Has any part of this been entered into public or unapproved AI tools?\n\nGSTS default: do not enter sensitive know-how into public or unapproved AI tools. Approved-tool use may require review if sensitive.",
+      hint: "Describe any known use, or type \"None — not entered into public or unapproved AI tools.\"",
+    },
+    {
+      field: "recommended_ip_treatment",
+      question: "What do you recommend as the IP treatment?\n\nChoose one or describe:",
+      options: [
+        "Maintain as trade secret",
+        "Review for patent protection",
+        "Review for design protection",
+        "Strengthen controls",
+        "No further action",
+      ],
+    },
+    {
+      field: "escalation_notes",
+      question: "Is there anything you are unsure about that should go to the IP Officer, CAIO, or Legal?",
+      hint: "Type \"None\" if nothing to flag.",
+    },
+    {
+      field: "additional_notes",
+      question: "Anything else we should record before your draft is prepared for review?",
+      hint: "Type \"None\" if nothing else.",
+    },
+  ];
+
+  // ── State ────────────────────────────────────────────────────────────
+  const answers = {};
+  let stepIndex = 0;
+  let branchQueue = [];
+  let waitingForAnswer = false;
+
+  const chat = document.getElementById("chat");
+  const userInput = document.getElementById("userInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const quickBtns = document.getElementById("quickBtns");
+  const inputArea = document.getElementById("inputArea");
+
+  // ── Helpers ──────────────────────────────────────────────────────────
+  function addMessage(text, role) {
+    const div = document.createElement("div");
+    div.className = `msg ${role}`;
+    div.textContent = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function updateProgress() {
+    const total = STEPS.length;
+    const pct = Math.min(100, Math.round((stepIndex / total) * 100));
+    document.getElementById("progressFill").style.width = pct + "%";
+    document.getElementById("progressLabel").textContent =
+      stepIndex >= total ? "Complete" : `Question ${stepIndex + 1} of ~${total}`;
+  }
+
+  function showQuickButtons(options) {
+    quickBtns.innerHTML = "";
+    quickBtns.style.display = "flex";
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.className = "btn-secondary";
+      btn.textContent = opt;
+      btn.onclick = () => {
+        userInput.value = opt;
+        submitAnswer();
+      };
+      quickBtns.appendChild(btn);
+    });
+  }
+
+  function hideQuickButtons() {
+    quickBtns.style.display = "none";
+    quickBtns.innerHTML = "";
+  }
+
+  function setInputEnabled(enabled) {
+    userInput.disabled = !enabled;
+    sendBtn.disabled = !enabled;
+    inputArea.style.opacity = enabled ? "1" : "0.45";
+  }
+
+  // ── Interview engine ───────────────────────────────────────────────
+  function startInterview() {
+    addMessage(
+      "Welcome to the GSTS Trade Secret Intake.\n\n" +
+      "The purpose of this interview is to help GSTS document confidential technical know-how " +
+      "that may qualify as a trade secret.\n\n" +
+      "We are not asking for source code or sensitive implementation details — " +
+      "plain-language answers and secure links are enough.\n\n" +
+      "I will ask one question at a time.",
+      "bot"
+    );
+    setTimeout(askNext, 600);
+  }
+
+  function askBranchStep(step) {
+    if (step.defaultValue) {
+      answers[step.field] = step.defaultValue;
+      if (step.question) addMessage(step.question, "bot");
+      else addMessage(step.defaultValue, "bot");
+      setTimeout(askNext, 400);
+      return;
+    }
+    presentQuestion(step);
+  }
+
+  function askNext() {
+    updateProgress();
+
+    if (branchQueue.length > 0) {
+      const branchStep = branchQueue.shift();
+      askBranchStep(branchStep);
+      return;
+    }
+
+    if (stepIndex >= STEPS.length) {
+      finishInterview();
+      return;
+    }
+
+    const step = STEPS[stepIndex];
+    stepIndex++;
+
+    if (step.autoAdvance) {
+      askBranchStep(step);
+      return;
+    }
+
+    presentQuestion(step);
+  }
+
+  function handleBranch(step, answer) {
+    if (!step.branch) return;
+    const key = answer.toLowerCase().startsWith("y") ? "yes" : "no";
+    const branch = step.branch[key];
+    if (branch) branchQueue.push(branch);
+  }
+
+  let lastPresentedStep = null;
+
+  function presentQuestion(step) {
+    lastPresentedStep = step;
+    waitingForAnswer = true;
+    setInputEnabled(true);
+    hideQuickButtons();
+
+    let q = step.question;
+    if (step.hint) q += "\n\nNote: " + step.hint;
+    addMessage(q, "bot");
+    userInput.focus();
+
+    if (step.yesNo) {
+      showQuickButtons(["Yes", "No"]);
+    } else if (step.options) {
+      showQuickButtons(step.options);
+    }
+  }
+
+  function submitAnswer() {
+    if (!waitingForAnswer) return;
+    const answer = userInput.value.trim();
+    if (!answer) return;
+
+    addMessage(answer, "user");
+    userInput.value = "";
+    hideQuickButtons();
+    waitingForAnswer = false;
+    setInputEnabled(false);
+
+    const step = lastPresentedStep;
+    if (step && step.field && !step.autoAdvance) {
+      answers[step.field] = answer;
+    }
+    if (step && step.yesNo) {
+      handleBranch(step, answer);
+    }
+
+    setTimeout(askNext, 350);
+  }
+
+  // ── Finish ───────────────────────────────────────────────────────────
+  function buildRecord() {
+    const now = new Date().toISOString();
+    return {
+      _meta: {
+        form: "GSTS Trade Secret Intake",
+        version: "1.0",
+        submitted_at: now,
+        review_status: "Drafted",
+        confidential: true,
+      },
+      candidate_title: answers.candidate_title || "",
+      business_owner_team: answers.business_owner_team || "",
+      technical_owner: answers.technical_owner || "",
+      inventors_contributors: answers.contributors || "",
+      plain_language_description: answers.plain_description || "",
+      where_used: answers.where_used || "",
+      novel_differentiating_aspects: answers.novel_aspects || "",
+      confidential_elements: answers.confidential_elements || "",
+      source_locations: [answers.source_locations, answers.source_locations_followup].filter(Boolean).join("\n"),
+      dissemination_history: answers.dissemination_history || "",
+      confidentiality_controls: answers.confidentiality_controls || "",
+      ai_use_restriction: answers.ai_use_restriction || "",
+      risk_if_disclosed: answers.risk_if_disclosed || "",
+      recommended_ip_treatment: answers.recommended_ip_treatment || "",
+      escalation_notes: answers.escalation_notes || "",
+      additional_notes: answers.additional_notes || "",
+    };
+  }
+
+  function finishInterview() {
+    updateProgress();
+    const record = buildRecord();
+
+    addMessage(
+      "Thank you — your intake is complete.\n\n" +
+      "A draft trade secret record will be prepared for technical accuracy review. " +
+      "It will only be shared with the approved review group.\n\n" +
+      "Status: Drafted → Technical review → IP review",
+      "bot"
+    );
+
+    localStorage.setItem("gsts_trade_secret_draft", JSON.stringify(record, null, 2));
+    window._finalRecord = record;
+
+    // Save to Python server when running via app.py
+    fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(record),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.ok) {
+          addMessage("Saved to server. Reference ID: " + data.submission_id, "bot");
+        }
+      })
+      .catch(() => {
+        // standalone mode (file opened directly) — download still works
+      });
+
+    inputArea.style.display = "none";
+    document.getElementById("donePanel").classList.add("visible");
+  }
+
+  function downloadRecord() {
+    const record = window._finalRecord || JSON.parse(localStorage.getItem("gsts_trade_secret_draft"));
+    const blob = new Blob([JSON.stringify(record, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `trade_secret_draft_${Date.now()}.json`;
+    a.click();
+  }
+
+  function copyRecord() {
+    const record = window._finalRecord || JSON.parse(localStorage.getItem("gsts_trade_secret_draft"));
+    navigator.clipboard.writeText(JSON.stringify(record, null, 2));
+    alert("Draft record copied to clipboard.");
+  }
+
+  // ── Keyboard shortcut ────────────────────────────────────────────────
+  userInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submitAnswer();
+    }
+  });
+
+  startInterview();
+</script>
+</body>
+</html>
