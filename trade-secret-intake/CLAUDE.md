@@ -357,7 +357,7 @@ Record as: `source_locations`
 - If **No** → record `dissemination_history` as "No known external disclosure" and skip to Q13.
 - If **Yes** → continue to Q12.
 
-Record as: `external_disclosure_yes_no`
+Record as: `external_disclosure` (true | false)
 
 ---
 
@@ -507,6 +507,9 @@ submitter_role:
 submitter_email:
 team:
 reporting_period:
+completion_mode:                    # self | handover
+submitter_is_owner:                 # true | false
+handover_from:                      # if handover: name, role, email, relationship
 technical_owner:                    # session-level; name, role, email
 
 # Phase 2 — screening
@@ -534,6 +537,7 @@ items:
     confidentiality_controls:
     ai_use_restriction:
     codebase_reference:             # optional
+    diagram_references:             # optional; links to draw.io, architecture diagrams
     codebase_assisted_summary:      # optional
     escalation_notes:
 ```
@@ -668,14 +672,14 @@ When a team member opens Claude, they should:
 | Q8 | Confidential elements | `confidential_elements` |
 | Q9 | Inventors and contributors | `inventors_contributors` |
 | Q10 | Source locations (links only) | `source_locations` |
-| Q11 | External disclosure (yes/no) | `external_disclosure_yes_no` |
+| Q11 | External disclosure (yes/no) | `external_disclosure` |
 | Q12 | Disclosure type and details | `dissemination_history` |
 | Q13 | Risk if disclosed | `risk_if_disclosed` |
 | Q14 | Recommended IP treatment | `recommended_ip_treatment` |
 | Q15 | Confidentiality controls | `confidentiality_controls` |
 | Q16 | AI-use restriction | `ai_use_restriction` |
 
-Plus session metadata (Phase 1): submitter, team, period, technical owner.  
+Plus session metadata (Phase 1): submitter, team, period, completion mode, handover (if applicable), technical owner.  
 Plus period screening (Phase 2): any IP generated this period?
 
 ---

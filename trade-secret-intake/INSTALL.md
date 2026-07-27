@@ -75,7 +75,7 @@ Email `trade-secret-intake.zip` + link to this INSTALL.md.
 ## Kickoff email (once skill is org-wide)
 
 > Install the GSTS Trade Secret Intake skill (see attached zip / IT portal).
-> Each quarter, open Claude and run `/trade-secret-intake`.
-> Upload your completed document to [SharePoint link] by [deadline].
+> Each reporting period (typically bi-monthly), open Claude and run `/trade-secret-intake`.
+> Upload your completed `.yaml` and `.md` files to [SharePoint link] by [deadline].
 
-Power Automate can still send this email on a schedule.
+n8n can send this reminder email on a schedule.
